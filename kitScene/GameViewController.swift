@@ -8,10 +8,18 @@
  - sometimes does not highlight squares on buildings (does not highlight squares below player)
  - allows you to move/build before calculations and animations are finished
  - auto generate ground and remove pre-generated ground so no loop through them in updateAvailableMoves()
+    - after that add option for adjustable board size
  - when auto generating players, assign names
+    - add it in setup screen
  - remove playercoords parameter
  - add sounds
  - after setup, last person to setup's player indicator does not work
+ - what to do if no possible moves left
+ - stop camera from going below water
+ - extra things to be configurable:
+    - add option for multiple figures for each person
+    - how many layers of buildings possible
+    - option for adjustable board size (already above)
  Finished
  - add fireworks to victory screen using particle system
  - you can play during other peoples turn
@@ -80,7 +88,7 @@ class GameViewController: UIViewController {
                                 [0, 0, 0, 0, 0],
                                 [0, 0, 0, 0, 0]]
     var menuOpened = false
-    var isMultiplayer = false
+    var isOnline = false
     var yourTurn = true
     var currentPlayer = 0
     var winPlayer = ""
@@ -97,7 +105,7 @@ class GameViewController: UIViewController {
         menuView.backgroundColor = UIColor.lightGray
         leaveButton.alpha = 0
         leaveButton.imageView?.tintColor = UIColor.red
-        if isMultiplayer == true {
+        if isOnline == true {
             let socket = manager.defaultSocket
             socket.connect()
             socket.on(clientEvent: .connect) { [self]data, ack in
@@ -294,7 +302,7 @@ class GameViewController: UIViewController {
         updateAvailableMoves(playerCoords: (player?.node.worldPosition)!)*/
         switchModes.isHidden = true
         playerIndicator.tintColor = colors[0]
-        if isMultiplayer == false {
+        if isOnline == false {
             label.text = "Player \(setupCounter+1), choose your starting position."
         }
         else if yourTurn == true {
@@ -329,18 +337,12 @@ class GameViewController: UIViewController {
     //domes dont have name
     func addNode(position: SCNVector3, thing: String) -> SCNNode {
         var url: URL?
-        if thing == "firstBuilding" || thing == "secondBuilding" || thing == "thirdBuilding" {
-            if position.y >= 3 {
-                url = Bundle.main.url(forResource: "dome", withExtension: "scn")!
-            }
-            else if position.y >= 2 {
+        if thing == "building" {
+            if position.y >= 2 {
                 url = Bundle.main.url(forResource: "thirdBuilding", withExtension: "scn")!
             }
-            else if position.y >= 1 {
-                url = Bundle.main.url(forResource: "secondBuilding", withExtension: "scn")!
-            }
             else {
-                url = Bundle.main.url(forResource: "firstBuilding", withExtension: "scn")!
+                url = Bundle.main.url(forResource: "secondBuilding", withExtension: "scn")!
             }
         }
         else {
@@ -355,6 +357,7 @@ class GameViewController: UIViewController {
         return referenceNode
     }
     
+    //function not used anymore
     func highestAt(x:Float, z:Float, scene: SCNScene) -> SCNNode?{
         var highestNode: SCNNode?
         for node in scene.rootNode.childNodes {
@@ -390,14 +393,15 @@ class GameViewController: UIViewController {
                             // }
                             let moveCheckResult = moveCheck(name: name, position: node.worldPosition, mode: .move, playerCoords: (player?.node.worldPosition)!)
                             var moveCoords = SCNVector3(0, 0, 0)
-                            if moveCheckResult == 1 {
-                                moveCoords = SCNVector3(x: node.worldPosition.x, y: node.worldPosition.y + 0.3, z: node.worldPosition.z)
+                            if moveCheckResult == 1 { // can move and build, is ground
+                                moveCoords = SCNVector3(x: node.worldPosition.x, y: node.worldPosition.y + 0.3, z: node.worldPosition.z) // 0.3 is player height
                             }
-                            else if moveCheckResult == 2 {
+                            else if moveCheckResult == 2 { // can move, is building
+                                // 0.8 = 0.5 building height + 0.3 player height
                                 moveCoords = SCNVector3(x: node.worldPosition.x, y: node.worldPosition.y + 0.8, z: node.worldPosition.z)
                             }
                             else {
-                                print("you cannot move there")
+                                //print("you cannot move there")
                                 label.text = "you cannot move there"
                                 return
                             }
@@ -406,7 +410,7 @@ class GameViewController: UIViewController {
                             players[player!.id].location = moveCoords
                             playersBoard[Int(round(moveCoords.z) + 2)][Int(round(moveCoords.x)) + 2] = (player?.id ?? 1) + 1
                             var pl: Float?
-                            if isMultiplayer == true {
+                            if isOnline == true {
                                 pl = Float(yourPlayer)
                                 print(moveCoords)
                                 let message = ["player" : pl!,
@@ -437,18 +441,12 @@ class GameViewController: UIViewController {
                                 //print(p.location)
                             }
                             var buildResult = 0
-                            if name == "building" {
-                                let checkResult = moveCheck(name: "building", position: node.worldPosition, mode: .build, playerCoords: (player?.node.worldPosition)!)
-                                if checkResult > 0 {
-                                    if node.worldPosition.y == highestAt(x: node.worldPosition.x, z: node.worldPosition.z, scene: gameScene)?.worldPosition.y {
-                                        buildResult = build(name: name, nodeLocation: node.worldPosition)
-                                    }
-                                }
-                            }
-                            else if name == "ground" && abs(node.worldPosition.x - (player?.node.worldPosition.x)!) <= 1 && abs(node.worldPosition.z - (player?.node.worldPosition.z)!) <= 1 {
+                            let checkResult = moveCheck(name: name, position: node.worldPosition, mode: .build, playerCoords: (player?.node.worldPosition)!)
+                            
+                            if checkResult > 0 {
                                 buildResult = build(name: name, nodeLocation: node.worldPosition)
                             }
-                            if buildResult == 0 {
+                            else {
                                 label.text = "you cannot build there"
                                 return
                             }
@@ -459,7 +457,7 @@ class GameViewController: UIViewController {
                             print(buildingsBoard[4])
                             print("")
                             var pl: Float?
-                            if isMultiplayer == true {
+                            if isOnline == true {
                                 pl = Float(yourPlayer)
                                 let message = ["player" : pl!,
                                                "mode" : 2,
@@ -470,7 +468,7 @@ class GameViewController: UIViewController {
                             }
                             // next turn
                             gameStatus = .move
-                            if isMultiplayer == false {
+                            if isOnline == false {
                                 if (player?.id ?? 0) + 1 < players.count {
                                     player = players[(player?.id ?? 0) + 1]
                                     playerIndicator.tintColor = colors[player?.id ?? 0]
@@ -490,11 +488,11 @@ class GameViewController: UIViewController {
                                     playerIndicator.tintColor = colors[0]
                                 }
                             }
-                            // remove v line for muliplayer
-                            if isMultiplayer == false {
+                            // remove v line for online muliplayer
+                            if isOnline == false {
                                 updateAvailableMoves(playerCoords: (player?.node.worldPosition)!)
                             }
-                            //change all nodes to normal
+                            //change all nodes to normal for online multiplayer
                             else {
                                 for nod in gameScene.rootNode.childNodes {
                                     if nod.name == "cyanGround" || nod.name == "yellowGround" {
@@ -514,15 +512,15 @@ class GameViewController: UIViewController {
                             }
                         }
                     }
-                    else {
+                    else { // for setup
                         if node.name == "ground" {
-                            for p in players {
-                                guard !(abs(node.worldPosition.x - p.location.x) < 0.1 && abs(node.worldPosition.z - p.location.z) < 0.1) else {label.text = "Player \(setupCounter+1), choose your starting position.";return}
-                            }
+                            // change to arrays or use moveCheck() | done
                             let loc = SCNVector3(x: node.worldPosition.x, y: node.worldPosition.y + 0.3, z: node.worldPosition.z)
+                            guard playersBoard[Int(round(loc.z) + 2)][Int(round(loc.x)) + 2] == 0 else {label.text = "Player \(setupCounter+1), choose your starting position.";return}
                             players.append(Player(node: addPlayer(position: loc, color: colors[setupCounter]), id: setupCounter, location: loc))
+                            playersBoard[Int(round(loc.z) + 2)][Int(round(loc.x)) + 2] = (player?.id ?? 1) + 1
                             var pl: Float?
-                            if isMultiplayer == true {
+                            if isOnline == true {
                                 pl = Float(yourPlayer)
                                 let message = ["player" : pl!,
                                                "mode" : 3,
@@ -532,10 +530,10 @@ class GameViewController: UIViewController {
                                 broadcast(message)
                             }
                             setupCounter += 1
-                            if setupCounter == numPlayers {
+                            if setupCounter == numPlayers { // start the game
                                 player = players[0]
                                 setup = false
-                                if isMultiplayer == false {
+                                if isOnline == false {
                                     label.text = "Start playing!"
                                     updateAvailableMoves(playerCoords: (player?.node.worldPosition)!)
                                 }
@@ -546,7 +544,7 @@ class GameViewController: UIViewController {
                                 return
                             }
                         }
-                        if isMultiplayer == false {
+                        if isOnline == false {
                             label.text = "Player \(setupCounter+1), choose your starting position."
                         }
                         else {
@@ -560,7 +558,7 @@ class GameViewController: UIViewController {
         }
     }
     
-    // change to if move down, move horizontally first and then down
+    // change to if move down, move horizontally first and then down | done
     func movePlayer(to: SCNVector3, player: Player) {
         let player = player.node
         
@@ -591,24 +589,28 @@ class GameViewController: UIViewController {
     }
     
     func build(name: String, nodeLocation: SCNVector3) -> Int {
+        // return:
+        // 0
+        // 1 = dome built
+        // 2 = building built
         if name == "building" {
             // if dome
             if nodeLocation.y + 1 >= 3.5 {
-                let nod = addNode(position: SCNVector3(x: nodeLocation.x, y: nodeLocation.y + 0.5, z: nodeLocation.z), thing: "thirdBuilding")
+                let nod = addNode(position: SCNVector3(x: nodeLocation.x, y: nodeLocation.y + 0.5, z: nodeLocation.z), thing: "dome")
                 nod.name = "dome"
                 buildingsBoard[Int(round(nod.worldPosition.z)) + 2][Int(round(nod.worldPosition.x)) + 2] += 1
                 return 2
             }
-            // if buillding
+            // if building
             else if nodeLocation.y + 1 < 3.5 {
-                let nod = addNode(position: SCNVector3(x: nodeLocation.x, y: nodeLocation.y + 1, z: nodeLocation.z), thing: "thirdBuilding")
+                let nod = addNode(position: SCNVector3(x: nodeLocation.x, y: nodeLocation.y + 1, z: nodeLocation.z), thing: "building")
                 buildingsBoard[Int(round(nod.worldPosition.z)) + 2][Int(round(nod.worldPosition.x)) + 2] += 1
                 nod.name = "building"
                 return 1
             }
         }
         if name == "ground" {
-            let nod = addNode(position: SCNVector3(x: nodeLocation.x, y: nodeLocation.y + 0.51, z: nodeLocation.z), thing: "thirdBuilding")
+            let nod = addNode(position: SCNVector3(x: nodeLocation.x, y: nodeLocation.y + 0.51, z: nodeLocation.z), thing: "firstBuilding")
             nod.name = "building"
             buildingsBoard[Int(round(nod.worldPosition.z)) + 2][Int(round(nod.worldPosition.x)) + 2] += 1
             return 1
@@ -617,9 +619,16 @@ class GameViewController: UIViewController {
     }
     
     func moveCheck(name: String, position: SCNVector3, mode: status, playerCoords: SCNVector3) -> Int {
-        if abs(position.x - playerCoords.x) <= 1 && abs(position.z - playerCoords.z) <= 1 {
+        // position is position to check
+        // return:
+        // -1 = player already there
+        // 0 = cannot move or build there
+        // 1 = can move and build, is ground
+        // 2 = is building, can move
+        // 3 = is building, can build
+        if abs(position.x - playerCoords.x) <= 1 && abs(position.z - playerCoords.z) <= 1 { // if x,z differences within 1
             for p in players {
-                if (abs(position.x - p.location.x) < 0.1 && abs(position.z - p.location.z) < 0.1) {
+                if (abs(position.x - p.location.x) < 0.1 && abs(position.z - p.location.z) < 0.1) { // if player (including self) already at position
                     return -1
                 }
             }
@@ -628,11 +637,12 @@ class GameViewController: UIViewController {
                 return 1
             }
             if name == "building" {
-                if position.y >= highestAt(x: position.x, z: position.z, scene: gameScene)?.worldPosition.y ?? -0.01 {
+                // change next line to check with 2d arrays | done
+                if Int(ceil(position.y)) == buildingsBoard[Int(round(position.z))+2][Int(round(position.x))+2] { // checks if pressed is top layer of building
                     if mode == .build {
                         return 3
                     }
-                    else if mode == .move && position.y - playerCoords.y <= 1.1 {
+                    else if mode == .move && position.y - playerCoords.y <= 1.1 { // check if position is more than one layer above player
                         return 2
                     }
                 }
@@ -719,7 +729,12 @@ class GameViewController: UIViewController {
              */
         }
         else if node.name != "building" || checkResults == -1 {
-            newNode = addNode(position: node.worldPosition, thing: "thirdBuilding")
+            if nodePosition.y >= 1 {
+                newNode = addNode(position: nodePosition, thing: "building")
+            }
+            else {
+                newNode = addNode(position: nodePosition, thing: "firstBuilding")
+            }
             newNode?.name = "building"
             node.removeFromParentNode()
         }
@@ -742,7 +757,7 @@ class GameViewController: UIViewController {
                     nod.removeFromParentNode()
                 }
             }
-            if isMultiplayer == true {
+            if isOnline == true {
                 broadcast(["player" : String(yourPlayer), "message":"gameWin"])
             }
             else {
@@ -751,7 +766,7 @@ class GameViewController: UIViewController {
             saveScene()
             //label.textColor = UIColor.green
             //label.text = "Player \((player?.id ?? -1) + 1) wins!"
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { // async for waiting for revert colors
                 self.performSegue(withIdentifier: "victory", sender: nil)
             }
         }
@@ -814,7 +829,7 @@ class GameViewController: UIViewController {
             manager.disconnect()
         }
         let vc = segue.destination as? VictoryViewController
-        if isMultiplayer == false {
+        if isOnline == false {
             vc?.winPlayer = String((player?.id ?? -1) + 1)
         }
         else {

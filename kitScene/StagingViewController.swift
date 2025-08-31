@@ -300,7 +300,7 @@ class StagingViewController: UIViewController {
         if let vc = segue.destination as? GameViewController {
             vc.numPlayers = lobbyCurrent
             vc.yourPlayer = myPlayer!
-            vc.isMultiplayer = true
+            vc.isOnline = true
         }
     }
     
