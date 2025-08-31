@@ -67,6 +67,7 @@
                             <constraint firstItem="vLD-kS-uES" firstAttribute="centerX" secondItem="uS0-xz-uUQ" secondAttribute="centerX" id="upc-Hq-mCK"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="ToZ-hI-zSY"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ee5-1Z-xTK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -495,16 +496,26 @@
                                 <color key="textColor" red="0.30840110780000002" green="0.5618229508" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P0n-Bn-4lI">
+                                <rect key="frame" x="242" y="290" width="183" height="35"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="Return to Main Menu"/>
+                                <connections>
+                                    <segue destination="kyv-uE-GsP" kind="show" id="3W4-jc-vVu"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="DT7-6u-cir"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="mhc-Pz-QKg" firstAttribute="centerX" secondItem="UEJ-cg-B26" secondAttribute="centerX" id="35C-Fb-Pxx"/>
                             <constraint firstItem="DT7-6u-cir" firstAttribute="trailing" secondItem="lKo-Sc-smQ" secondAttribute="trailing" id="855-J9-cAf"/>
+                            <constraint firstItem="DT7-6u-cir" firstAttribute="bottom" secondItem="P0n-Bn-4lI" secondAttribute="bottom" constant="50" id="EJv-Xa-7bB"/>
                             <constraint firstItem="mhc-Pz-QKg" firstAttribute="top" secondItem="DT7-6u-cir" secondAttribute="top" constant="20" id="IDl-ms-bVH"/>
                             <constraint firstItem="lKo-Sc-smQ" firstAttribute="leading" secondItem="DT7-6u-cir" secondAttribute="leading" id="MzY-1o-LOG"/>
                             <constraint firstItem="lKo-Sc-smQ" firstAttribute="top" secondItem="DT7-6u-cir" secondAttribute="top" id="aOg-YU-l4d"/>
                             <constraint firstItem="DT7-6u-cir" firstAttribute="bottom" secondItem="lKo-Sc-smQ" secondAttribute="bottom" id="fcm-Yy-OMU"/>
+                            <constraint firstItem="P0n-Bn-4lI" firstAttribute="centerX" secondItem="UEJ-cg-B26" secondAttribute="centerX" id="v1o-d5-E4F"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="Pru-J2-t6n"/>
@@ -521,7 +532,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="Nuv-nd-PVa"/>
         <segue reference="hGi-fo-xyo"/>
-        <segue reference="0MC-uK-yGY"/>
+        <segue reference="3W4-jc-vVu"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="capsule.portrait.fill" catalog="system" width="112" height="128"/>

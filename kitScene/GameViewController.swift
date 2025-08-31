@@ -5,7 +5,6 @@
  Created by Matthew Wang on 2024-01-07.
  
  Bugs/Improvements:
- - sometimes does not highlight squares on buildings (does not highlight squares below player)
  - allows you to move/build before calculations and animations are finished
  - auto generate ground and remove pre-generated ground so no loop through them in updateAvailableMoves()
     - after that add option for adjustable board size
@@ -26,12 +25,15 @@
  - fix outdated message fifo system
  - when to delete messages
  - staging room, lobby need to be setup
+ - sometimes does not highlight squares on buildings (does not highlight squares below player)
+ - omni light still there during victory cutscene
 */
 
 import UIKit
 import SceneKit
 import SocketIO
 import SwiftUI
+import RealityKit
 //import AWSMobileClientXCF
 //import AWSAuthCore
 //import AWSSQS
@@ -287,6 +289,7 @@ class GameViewController: UIViewController {
     }*/
     
     func setupScene() {
+        
         gameView.allowsCameraControl = true
         gameScene = SCNScene(named: "mainScene.scn")
         gameView.scene = gameScene
@@ -430,7 +433,9 @@ class GameViewController: UIViewController {
                                 self.checkVictory()
                             }
                             gameStatus = .build
-                            updateAvailableMoves(playerCoords: moveCoords)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                self.updateAvailableMoves(playerCoords: moveCoords)
+                            }
                             
                             // move player to slightly adjusted position using move function
                         }
@@ -754,6 +759,9 @@ class GameViewController: UIViewController {
                     var newNode: SCNNode?
                     newNode = addNode(position: nod.worldPosition, thing: "thirdBuilding")
                     newNode?.name = "building"
+                    nod.removeFromParentNode()
+                }
+                else if nod.name == "omni" || nod.name == "ambient"{
                     nod.removeFromParentNode()
                 }
             }
