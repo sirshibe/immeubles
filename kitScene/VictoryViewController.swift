@@ -24,7 +24,7 @@ class VictoryViewController: UIViewController {
         catch {print("failed to load"); return}
         gameView.scene = gameScene
         gameView.isPlaying = true
-        label.text = "Player \(winPlayer) wins!"
+        label.text = "\(winPlayer) wins!"
         label.textColor = UIColor.green
         for i in 1...30 {
             createFireworks(color: fireworkColors[i%5], location: SCNVector3(x: Float.random(in: -15...15), y: 10, z: Float.random(in: -15...15)), idleTime: CGFloat.random(in: 1...2))
