@@ -57,10 +57,11 @@ class GameViewController: UIViewController {
         var location: SCNVector3
     }
     
-    let colors = [UIColor(red: 1, green: 38/255, blue: 0, alpha: 1),
+    var colors = [UIColor(red: 1, green: 38/255, blue: 0, alpha: 1),
                   UIColor(red: 0, green: 38/255, blue: 1, alpha: 1),
                   UIColor(red: 0, green: 200/255, blue: 0, alpha: 1),
                   UIColor.yellow]
+    var playerNames = ["Player 1", "Player 2", "Player 3", "Player 4"]
     let spawnLocs = [SCNVector3(-1, 0.3, 0), SCNVector3(1, 0.3, 0), SCNVector3(0, 0.3, -1), SCNVector3(0, 0.3, 1)]
     var yourPlayer = 0
     var gameStatus: status = .move
@@ -306,10 +307,10 @@ class GameViewController: UIViewController {
         switchModes.isHidden = true
         playerIndicator.tintColor = colors[0]
         if isOnline == false {
-            label.text = "Player \(setupCounter+1), choose your starting position."
+            label.text = playerNames[setupCounter+1]+", choose your starting position."
         }
         else if yourTurn == true {
-            label.text = "Player \(setupCounter+1) (you), choose your starting position."
+            label.text = playerNames[setupCounter+1]+" (you), choose your starting position."
         }
         /* print(playersBoard[0])
         print(playersBoard[1])
@@ -521,7 +522,7 @@ class GameViewController: UIViewController {
                         if node.name == "ground" {
                             // change to arrays or use moveCheck() | done
                             let loc = SCNVector3(x: node.worldPosition.x, y: node.worldPosition.y + 0.3, z: node.worldPosition.z)
-                            guard playersBoard[Int(round(loc.z) + 2)][Int(round(loc.x)) + 2] == 0 else {label.text = "Player \(setupCounter+1), choose your starting position.";return}
+                            guard playersBoard[Int(round(loc.z) + 2)][Int(round(loc.x)) + 2] == 0 else {label.text = playerNames[setupCounter+1]+", choose your starting position.";return}
                             players.append(Player(node: addPlayer(position: loc, color: colors[setupCounter]), id: setupCounter, location: loc))
                             playersBoard[Int(round(loc.z) + 2)][Int(round(loc.x)) + 2] = (player?.id ?? 1) + 1
                             var pl: Float?
@@ -550,7 +551,7 @@ class GameViewController: UIViewController {
                             }
                         }
                         if isOnline == false {
-                            label.text = "Player \(setupCounter+1), choose your starting position."
+                            label.text = playerNames[setupCounter+1]+", choose your starting position."
                         }
                         else {
                             label.text = ""
@@ -838,7 +839,8 @@ class GameViewController: UIViewController {
         }
         let vc = segue.destination as? VictoryViewController
         if isOnline == false {
-            vc?.winPlayer = String((player?.id ?? -1) + 1)
+            // TODO: change to put player names in Player class
+            vc?.winPlayer = playerNames[player!.id+1]
         }
         else {
             vc?.winPlayer = winPlayer
