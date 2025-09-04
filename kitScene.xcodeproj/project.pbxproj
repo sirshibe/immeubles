@@ -85,6 +85,7 @@
 		3DAC728D2BA5398200D3275F /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 3DAC728C2BA5398200D3275F /* SocketIO */; };
 		3DAC728F2BA53B5E00D3275F /* sendMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DAC728E2BA53B5E00D3275F /* sendMessage.swift */; };
 		3DAC72912BAB7D4400D3275F /* fireworks.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3DAC72902BAB7D4400D3275F /* fireworks.mp3 */; };
+		3DCC98DC2E69BD0100671442 /* RulesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DCC98DB2E69BD0100671442 /* RulesViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +139,7 @@
 		3DAC72892BA2736600D3275F /* SNS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SNS.swift; sourceTree = "<group>"; };
 		3DAC728E2BA53B5E00D3275F /* sendMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sendMessage.swift; sourceTree = "<group>"; };
 		3DAC72902BAB7D4400D3275F /* fireworks.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = fireworks.mp3; sourceTree = "<group>"; };
+		3DCC98DB2E69BD0100671442 /* RulesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +254,7 @@
 				3D4FE0FC2B4B1C5F0043F696 /* Assets.xcassets */,
 				3D4FE0FE2B4B1C5F0043F696 /* LaunchScreen.storyboard */,
 				3DAC72892BA2736600D3275F /* SNS.swift */,
+				3DCC98DB2E69BD0100671442 /* RulesViewController.swift */,
 			);
 			path = kitScene;
 			sourceTree = "<group>";
@@ -500,6 +503,7 @@
 				3D4FE0F42B4B1C5E0043F696 /* AppDelegate.swift in Sources */,
 				3DAC728F2BA53B5E00D3275F /* sendMessage.swift in Sources */,
 				3D8687642B54AA9500AC0A0B /* StartViewController.swift in Sources */,
+				3DCC98DC2E69BD0100671442 /* RulesViewController.swift in Sources */,
 				3D9CDFD82B803C6700B9769E /* sqsLogin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
